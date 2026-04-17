@@ -42,8 +42,15 @@ export const AiPanel: React.FC<AiPanelProps> = ({ projectId, milestoneId }) => {
         setMessages(prev => [...prev, { role: 'assistant', content: "Rate limit exceeded. Please try again later." }]);
       } else {
         const data = await response.json();
-        setMessages(prev => [...prev, { role: 'assistant', content: data.choices?.[0]?.message?.content || "Processed", type: 'card', result: { name: 'result.pdf' } }]);
-      }
+        const assistantMessage = data.choices?.[0]?.message;
+        
+        if (assistantMessage.tool_calls) {
+          // Handle tool calls (actionable items)
+          const toolCall = assistantMessage.tool_calls[0];
+          setMessages(prev => [...prev, { role: 'assistant', content: `Executing action: ${toolCall.function.name}`, type: 'card', result: { action: 'confirm', name: toolCall.function.name } }]);
+        } else {
+          setMessages(prev => [...prev, { role: 'assistant', content: assistantMessage.content || "Processed", type: 'text' }]);
+        }
     } catch (e) {
       setMessages(prev => [...prev, { role: 'assistant', content: "Model unavailable. Try again." }]);
     }
