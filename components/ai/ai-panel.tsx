@@ -1,206 +1,106 @@
-import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
-import { X, Sparkles, SendHorizontal } from 'lucide-react';
-import { useAiStore } from '@/store/ai';
+'use client';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { createPortal } from 'react-dom';
-import { usePathname, useParams } from 'next/navigation';
+import { Send, Paperclip, FileCheck, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const renderMessageContent = (text: string) => {
-  if (!text) return null;
-  // Basic markdown link parser to render nice download buttons
-  const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g;
-  const parts = [];
-  let lastIndex = 0;
-  let match;
+export interface AiPanelProps {
+  projectId?: string;
+  milestoneId?: string;
+}
 
-  while ((match = linkRegex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(<span key={lastIndex}>{text.slice(lastIndex, match.index)}</span>);
-    }
-    parts.push(
-      <a 
-        key={match.index} 
-        href={match[2]} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/20 rounded-xl px-3 py-1.5 mt-2 mb-1 text-sm font-semibold transition-colors"
-      >
-        <span className="shrink-0 group-hover:scale-110 transition-transform">⬇️</span>
-        {match[1]}
-      </a>
-    );
-    lastIndex = linkRegex.lastIndex;
-  }
-  
-  if (lastIndex < text.length) {
-    parts.push(<span key={lastIndex}>{text.slice(lastIndex)}</span>);
-  }
-
-  return <div className="whitespace-pre-wrap">{parts}</div>;
-};
-
-export function AiPanel() {
-  const { isOpen, closeAi } = useAiStore();
-  const [messages, setMessages] = useState<{role: 'user'|'ai'|'system', content: string}[]>([
-    { role: 'ai', content: "Hi! I'm your Paylob AI Assistant. How can I help you draft your contracts and manage payments?" }
-  ]);
+export const AiPanel: React.FC<AiPanelProps> = ({ projectId, milestoneId }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<{role: 'user'|'assistant', content: string, type?: 'text'|'card', result?: any}[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const pathname = usePathname();
-  const params = useParams();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState('');
+  const [fileRequest, setFileRequest] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [emailInput, setEmailInput] = useState('');
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, isOpen, isLoading]);
+  const suggestions = ["Compress a PDF", "Merge files", "Create a project", "Summarize this document", "Check payment status"];
 
-  if (!isOpen) return null;
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-    const userMsg = input;
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+  const sendToAi = async (text: string = input, fileId?: string, email?: string) => {
+    if (!text && !fileId && !email) return;
+    setMessages(prev => [...prev, { role: 'user', content: text || (fileId ? 'File uploaded' : 'Email provided') }]);
     setIsLoading(true);
+    setStatus('Processing...');
     
     try {
       const response = await fetch('/api/ai/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          messages: [...messages, { role: 'user', content: userMsg }].map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content })),
-          context: { path: pathname, ...params }
+          messages: [...messages, { role: 'user', content: text }],
+          context: { projectId, milestoneId, fileId, email }
         })
       });
-      
-      const data = await response.json();
-      const aiReply = data?.choices?.[0]?.message?.content || "I'm having trouble processing that request right now.";
-      
-      setMessages(prev => [...prev, { role: 'ai', content: aiReply }]);
-    } catch (err) {
-      setMessages(prev => [...prev, { role: 'system', content: 'Connection error communicating with AI server.' }]);
-    } finally {
-      setIsLoading(false);
+      if (response.status === 429) {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Rate limit exceeded. Please try again later." }]);
+      } else {
+        const data = await response.json();
+        setMessages(prev => [...prev, { role: 'assistant', content: data.choices?.[0]?.message?.content || "Processed", type: 'card', result: { name: 'result.pdf' } }]);
+      }
+    } catch (e) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Model unavailable. Try again." }]);
     }
+    setIsLoading(false);
+    setInput('');
+    setEmailInput('');
   };
 
-  const suggestions = [
-    "Draft a milestone contract",
-    "Explain the escrow process",
-    "How do I request a revision?"
-  ];
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setStatus('Uploading...');
+    setProgress(0);
+    // Simulating upload progress
+    const interval = setInterval(() => {
+      setProgress(p => p < 90 ? p + 10 : 90);
+    }, 200);
+    
+    // Simulate API upload
+    setTimeout(async () => {
+      clearInterval(interval);
+      setProgress(100);
+      setStatus('Processing...');
+      // In real scenario: const fileId = await uploadFile(file);
+      const fileId = 'mock-file-id';
+      sendToAi('Uploaded file: ' + file.name, fileId);
+    }, 2000);
+  };
 
-  const content = (
-    <div className="fixed inset-0 z-[100] pointer-events-none flex justify-end p-0 md:p-4 md:pt-20">
-      {/* Mobile Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm pointer-events-auto md:hidden transition-opacity" 
-        onClick={closeAi} 
-      />
-      
-      {/* Glass Panel */}
-      <div className="w-full md:w-[420px] h-[100vh] md:h-[calc(100vh-100px)] pointer-events-auto flex flex-col bg-white/70 dark:bg-[#1C1C1C]/70 backdrop-blur-3xl saturate-[1.8] border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] md:rounded-[32px] overflow-hidden animate-in slide-in-from-right-8 fade-in duration-300">
-        
-        {/* Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-white/20 bg-white/40 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 via-fuchsia-500 to-orange-500 flex items-center justify-center p-1.5 shadow-sm">
-                <Sparkles className="w-full h-full text-white" />
-            </div>
-            <span className="font-semibold text-[#1C1C1C] tracking-tight text-lg">Paylob AI</span>
-          </div>
-          <button onClick={closeAi} className="p-2 text-[#8B8680] hover:text-[#1C1C1C] hover:bg-black/5 rounded-full transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5" ref={scrollRef}>
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {m.role === 'ai' && (
-                 <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-500 to-orange-500 shrink-0 mt-1 mr-3 flex items-center justify-center shadow-sm">
-                    <Sparkles className="w-3 h-3 text-white" />
-                 </div>
-              )}
-              {m.role === 'system' ? (
-                <div className="text-xs text-red-500 bg-red-50 px-3 py-1 rounded-lg border border-red-100 mx-auto">
-                  {renderMessageContent(m.content)}
-                </div>
-              ) : (
-                <div className={`max-w-[85%] px-4 py-3 text-[15px] leading-relaxed shadow-sm ${
-                  m.role === 'user' 
-                    ? 'bg-[#1C1C1C] text-white rounded-[24px] rounded-br-[8px]' 
-                    : 'bg-white/80 border border-white border-b-black/5 text-[#1C1C1C] rounded-[24px] rounded-tl-[8px]'
-                }`}>
-                  {renderMessageContent(m.content)}
-                </div>
-              )}
-            </div>
-          ))}
-          
-          {isLoading && (
-            <div className="flex justify-start items-end gap-2">
-               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-violet-500 to-orange-500 shrink-0 mt-1 mr-3 flex items-center justify-center opacity-70 animate-pulse">
-                  <Sparkles className="w-3 h-3 text-white" />
-               </div>
-               <div className="bg-white/80 border border-white px-4 py-3 rounded-[24px] rounded-tl-[8px] flex items-center gap-1.5 h-11 shadow-sm">
-                  <div className="w-1.5 h-1.5 bg-[#8B8680] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                  <div className="w-1.5 h-1.5 bg-[#8B8680] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                  <div className="w-1.5 h-1.5 bg-[#8B8680] rounded-full animate-bounce" />
-               </div>
-            </div>
-          )}
-
-          {messages.length === 1 && (
-            <div className="flex flex-wrap gap-2 pt-4">
-              {suggestions.map(s => (
-                <button 
-                  key={s} 
-                  onClick={() => setInput(s)}
-                  className="text-sm bg-white/60 border border-white/40 text-[#1C1C1C] rounded-full px-4 py-2 hover:bg-white/90 shadow-sm transition-all text-left"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="p-4 bg-white/40 border-t border-white/20 shrink-0">
-          <div className="relative flex items-end bg-white/80 border border-black/5 rounded-[28px] overflow-hidden shadow-sm shadow-black/5 ring-1 ring-transparent focus-within:ring-violet-500/30 transition-all p-1">
-            <textarea 
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="Ask anything..."
-              rows={input.split('\n').length > 1 ? Math.min(input.split('\n').length, 4) : 1}
-              className="w-full bg-transparent resize-none pl-4 pr-12 py-3.5 text-[15px] focus:outline-none placeholder:text-[#8B8680]"
-            />
-            <button 
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              className="absolute right-2 bottom-2 p-2.5 bg-gradient-to-tr from-[#1C1C1C] to-[#2D2D2D] text-white rounded-full disabled:opacity-50 disabled:from-[#D4CFCA] disabled:to-[#D4CFCA] transition-all hover:scale-105 active:scale-95 shadow-md flex items-center justify-center"
-            >
-              <SendHorizontal className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="text-[10px] text-center mt-2 text-[#8B8680] uppercase tracking-widest font-semibold opacity-70">
-            Powered by Paylob AI
-          </div>
-        </div>
-      </div>
+  return (
+    <div className={cn("fixed right-0 top-0 h-full w-96 bg-[#F5F2ED] border-l border-[#D4CFCA] transition-transform z-50", isOpen ? "translate-x-0": "translate-x-full")}>
+       <div className='p-4 h-full flex flex-col'>
+         <div className="flex-1 overflow-y-auto space-y-4">
+           {messages.length === 0 && (
+             <div className="space-y-3">
+               <p className="text-sm font-semibold text-[#1C1C1C]">Start a task:</p>
+               {suggestions.map(s => <Button key={s} variant="outline" className="w-full justify-start text-xs h-9 bg-white border-[#D4CFCA] hover:bg-[#EAE6DF]" onClick={() => sendToAi(s)}>{s}</Button>)}
+             </div>
+           )}
+           {messages.map((m, i) => (
+             <div key={i} className={cn("p-3 rounded-lg text-sm", m.role === 'user' ? 'bg-[#EAE6DF]' : 'bg-white border border-[#D4CFCA]')}>
+               {m.content}
+               {m.type === 'card' && <div className="mt-3 p-3 bg-white border border-[#D4CFCA] rounded flex items-center justify-between"><div className='flex items-center gap-2'><FileCheck size={16}/>{m.result.name}</div><Button size="sm" variant="outline">Download</Button></div>}
+             </div>
+           ))}
+           {isLoading && <div className="text-sm text-[#8B8680] flex items-center gap-2"><Loader2 className="animate-spin" size={16}/>{status} {progress > 0 && `(${progress}%)`}</div>}
+         </div>
+         <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+         <div className='flex flex-col gap-2 mt-4'>
+           <div className='flex gap-2'>
+            <input value={input} onChange={e => setInput(e.target.value)} className='flex-1 border border-[#D4CFCA] p-2 rounded text-sm bg-white' placeholder="Ask AI..." />
+            <Button onClick={() => sendToAi()} disabled={isLoading} size="icon" className="bg-[#1C1C1C] text-white"><Send size={16}/></Button>
+            <Button variant="ghost" onClick={() => fileInputRef.current?.click()} size="icon" className="text-[#8B8680]"><Paperclip size={16}/></Button>
+           </div>
+         </div>
+       </div>
+       <Button className='absolute -left-12 top-10 bg-[#1C1C1C] text-white' onClick={() => setIsOpen(!isOpen)}>AI</Button>
     </div>
   );
-
-  return createPortal(content, document.body);
-}
+};

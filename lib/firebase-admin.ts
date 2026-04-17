@@ -1,16 +1,13 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
+import * as serviceAccount from '../service-account.json';
 
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      projectId: process.env.FIREBASE_PROJECT_ID || 'paylob-app',
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-    });
-  } catch (e) {
-    console.error('Firebase Admin initialization error:', e);
-  }
-}
+const app = initializeApp({
+  credential: cert(serviceAccount as any)
+});
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
-export const adminStorage = admin.storage();
+export const adminDb = getFirestore(app);
+export const adminAuth = getAuth(app);
+export const adminStorage = getStorage(app);

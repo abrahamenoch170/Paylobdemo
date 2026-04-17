@@ -1,14 +1,12 @@
 ---
 name: compress_pdf
-description: Compress a PDF document to reduce file size.
+description: Compresses a PDF document to reduce file size.
 parameters:
   type: object
   properties:
-    fileId:
+    fileUrl:
       type: string
-      description: The ID of the file to compress.
+      description: The URL of the PDF to compress.
   required:
-    - fileId
+    - fileUrl
 ---
-# Compress PDF
-This skill makes an API call to compress a loaded PDF document.
