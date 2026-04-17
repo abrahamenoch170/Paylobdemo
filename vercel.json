@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "env": {
+    "OPENROUTER_API_KEY": "@openrouter_api_key",
+    "RESEND_API_KEY": "@resend_api_key",
+    "FLUTTERWAVE_SECRET_KEY": "@flutterwave_secret_key",
+    "PAYSTACK_SECRET_KEY": "@paystack_secret_key"
+  }
+}

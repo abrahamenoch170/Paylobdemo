@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    match /uploads/{userId}/{fileId}/{filename} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if false; // Private files require signed URLs
+    }
+
+    match /previews/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
