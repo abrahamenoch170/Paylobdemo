@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-background: #F5F2ED;
+  --color-surface: #FFFFFF;
+  --color-border: #D4CFCA;
+  --color-text-primary: #1C1C1C;
+  --color-text-secondary: #8B8680;
+  --color-text-tertiary: #999999;
+  --color-accent-action: #1C1C1C;
+  --color-accent-success: #4CAF50;
+  --color-accent-warning: #F59E0B;
+  --color-accent-danger: #E53E3E;
+}
+
+@layer base {
+  :root {
+    --background: 24 16% 94%;
+    --foreground: 0 0% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 11%;
+    --primary: 0 0% 11%;
+    --primary-foreground: 24 16% 94%;
+    --secondary: 24 16% 94%;
+    --secondary-foreground: 0 0% 11%;
+    --muted: 24 16% 94%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 24 16% 94%;
+    --accent-foreground: 0 0% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 24 16% 94%;
+    --border: 24 16% 82%;
+    --input: 24 16% 82%;
+    --ring: 0 0% 11%;
+    --radius: 0.75rem;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-action focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}

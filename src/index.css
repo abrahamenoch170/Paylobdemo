@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-background: #F5F2ED;
+  --color-surface: #FFFFFF;
+  --color-border: #D4CFCA;
+  --color-text-primary: #1C1C1C;
+  --color-text-secondary: #8B8680;
+  --color-text-tertiary: #999999;
+  --color-accent-action: #1C1C1C;
+  --color-accent-success: #4CAF50;
+  --color-accent-warning: #F59E0B;
+  --color-accent-danger: #E53E3E;
+}
+
+@layer base {
+  :root {
+    --background: #F5F2ED;
+    --foreground: #1C1C1C;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply font-sans antialiased;
+  }
+  
+  /* Custom utility classes for focus rings, selection, and scrollbars */
+  ::selection {
+    background-color: #1C1C1C;
+    color: #F5F2ED;
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-action focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #D4CFCA;
+    border-radius: 3px;
+  }
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #8B8680;
+  }
+}

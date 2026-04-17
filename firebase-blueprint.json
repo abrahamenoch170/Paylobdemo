@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "Application user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "freelancer", "admin"] },
+        "payoutInfo": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "project": {
+      "title": "Project",
+      "description": "A collaborative engagement between a client and a freelancer",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "clientId": { "type": "string" },
+        "freelancerId": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "ACTIVE", "COMPLETED", "DISPUTED"] },
+        "totalValue": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "milestone": {
+      "title": "Milestone",
+      "description": "A specific deliverable and payment phase within a project",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "amount": { "type": "number" },
+        "state": { "type": "string", "enum": ["PENDING", "FUNDED", "AUTHORIZED", "COMPLETED", "DISPUTED", "REFUNDED"] },
+        "deliveryType": { "type": "string" },
+        "deliveryMetadata": { "type": "object" },
+        "paymentRef": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "dispute": {
+      "title": "Dispute",
+      "description": "A conflict report for a milestone",
+      "type": "object",
+      "properties": {
+        "milestoneId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["OPEN", "RESOLVED"] },
+        "filedBy": { "type": "string" },
+        "auditLog": { "type": "array" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profile data"
+    },
+    "/projects/{projectId}": {
+      "schema": "project",
+      "description": "Project meta data"
+    },
+    "/projects/{projectId}/messages/{messageId}": {
+      "schema": { "type": "object" },
+      "description": "Project chat messages"
+    },
+    "/milestones/{milestoneId}": {
+      "schema": "milestone",
+      "description": "Milestone management"
+    },
+    "/disputes/{disputeId}": {
+      "schema": "dispute",
+      "description": "Dispute audit and resolution"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "type": "object" },
+      "description": "User notifications"
+    }
+  }
+}
