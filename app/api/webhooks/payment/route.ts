@@ -13,12 +13,17 @@ export async function POST(req: Request) {
       return new Response('Missing signature', { status: 401 });
     }
 
-    // Verify signature
     let isValid = false;
     if (provider === 'paystack') {
       isValid = paystack.verifyWebhook(signature, rawBody);
     } else {
-      isValid = flutterwave.verifyWebhook(signature, JSON.parse(rawBody));
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(rawBody);
+      } catch {
+        return new Response('Invalid JSON', { status: 400 });
+      }
+      isValid = flutterwave.verifyWebhook(signature, parsed);
     }
 
     if (!isValid) {
@@ -40,7 +45,7 @@ export async function POST(req: Request) {
         await milestoneRef.update({
           state: 'AUTHORIZED',
           paymentRef: reference,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
         await adminDb.collection('payments').add({
@@ -51,16 +56,13 @@ export async function POST(req: Request) {
           currency: data.currency,
           customerEmail: data.customer?.email || data.user?.email,
           status: 'SUCCESS',
-          createdAt: new Date()
+          createdAt: new Date(),
         });
-        
-        console.log(`✅ Payment authorized for milestone ${milestoneId}`);
       }
     }
 
     return NextResponse.json({ status: 'ok', msg: 'payment webhook processed' });
-  } catch (err: any) {
-    console.error('Webhook processing error:', err);
+  } catch {
     return new Response('Internal Server Error', { status: 500 });
   }
 }

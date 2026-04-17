@@ -44,7 +44,7 @@ export function Sidebar({ collapsed }: SidebarProps) {
   const location = useLocation();
   const openAi = useAiStore(state => state.openAi);
 
-  const NavItem = ({ item }: { item: any }) => {
+  const NavItem = ({ item }: { item: { href: string; label: string; icon: React.ComponentType<{ className?: string }> } }) => {
     const isActive = location.pathname.startsWith(item.href) && item.href !== '/';
     const Icon = item.icon;
 

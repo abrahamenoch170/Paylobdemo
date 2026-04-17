@@ -14,7 +14,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, githubProvider } from '@/lib/firebase';
 
 interface AuthContextType {
-  user: (FirebaseUser & any) | null;
+  user: (FirebaseUser & { role?: "client" | "freelancer" | "admin" | null; onboardingComplete?: boolean }) | null;
   loading: boolean;
   signUp: (email: string, pass: string, name: string) => Promise<void>;
   signIn: (email: string, pass: string) => Promise<void>;
@@ -27,7 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<(FirebaseUser & any) | null>(null);
+  const [user, setUser] = useState<(FirebaseUser & { role?: "client" | "freelancer" | "admin" | null; onboardingComplete?: boolean }) | null>(null);
   const [loading, setLoading] = useState(true);
 
   const syncUserData = async (firebaseUser: FirebaseUser) => {
@@ -51,13 +51,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+
+  const setSessionCookie = async (firebaseUser: FirebaseUser | null) => {
+    if (typeof document === 'undefined') return;
+    if (!firebaseUser) {
+      document.cookie = 'firebaseIdToken=; Path=/; Max-Age=0; SameSite=Lax';
+      return;
+    }
+
+    const token = await firebaseUser.getIdToken();
+    document.cookie = `firebaseIdToken=${encodeURIComponent(token)}; Path=/; Max-Age=3600; SameSite=Lax`;
+  };
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       if (firebaseUser) {
         await syncUserData(firebaseUser);
+        await setSessionCookie(firebaseUser);
       } else {
         setUser(null);
+        await setSessionCookie(null);
       }
       setLoading(false);
     });

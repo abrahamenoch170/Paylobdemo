@@ -4,7 +4,7 @@ import { X, Send, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface ChangeOrderModalProps {
   isOpen: boolean;
@@ -48,17 +48,12 @@ export function ChangeOrderModal({
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48h expiration
       });
 
-      // Send simulated email
-      await fetch('/api/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: 'client@example.com',
-          subject: 'Change Order Request Received',
-          template: 'change-order-requested',
-          data: { changeOrderId: coRef.id }
-        })
-      }).catch(() => {});
+      await addDoc(collection(db, 'notifications'), {
+        userId: projectId,
+        message: `Change order ${coRef.id} requires response.`,
+        read: false,
+        createdAt: serverTimestamp()
+      });
 
       if (onSuccess) onSuccess();
       onClose();
@@ -100,7 +95,7 @@ export function ChangeOrderModal({
                   ].map(t => (
                     <button 
                       key={t.id}
-                      onClick={() => setType(t.id as any)}
+                      onClick={() => setType(t.id as ChangeOrderModalProps["initialType"])}
                       className={`px-4 py-2 text-sm rounded-lg border transition-all ${
                         type === t.id 
                         ? 'bg-[#1C1C1C] text-white border-[#1C1C1C]' 

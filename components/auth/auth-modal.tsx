@@ -84,8 +84,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
     try {
       await signIn(data.email, data.password);
       handleAuthSuccess();
-    } catch (e: any) {
-      setErrorMsg(e.message || 'Login failed.');
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "UNKNOWN";
+      setErrorMsg(errorMessage || 'Login failed.');
     }
   };
 
@@ -94,8 +95,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
     try {
       await signUp(data.email, data.password, data.fullname);
       handleAuthSuccess();
-    } catch (e: any) {
-      setErrorMsg(e.message || 'Signup failed.');
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "UNKNOWN";
+      setErrorMsg(errorMessage || 'Signup failed.');
     }
   };
 
@@ -106,8 +108,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
       else if (provider === 'GitHub') await signInWithGitHub();
       else if (provider === 'Apple') await signInWithApple();
       handleAuthSuccess();
-    } catch (e: any) {
-      setErrorMsg(e.message || `${provider} login failed.`);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "UNKNOWN";
+      setErrorMsg(errorMessage || `${provider} login failed.`);
     }
   };
 

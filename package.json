@@ -7,7 +7,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint",
+    "lint": "eslint app components lib hooks context store types middleware.ts --ext .ts,.tsx",
     "skills:sync": "node scripts/sync-skills.js"
   },
   "dependencies": {

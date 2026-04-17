@@ -14,13 +14,14 @@ import { Send, Paperclip, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { sanitizeText } from '@/lib/sanitize';
 
 interface Message {
   id: string;
   senderId: string;
   senderName: string;
   content: string;
-  timestamp: any;
+  timestamp: { toDate?: () => Date } | null;
   attachments?: string[];
   type: 'text' | 'system' | 'ai_warning';
 }
@@ -36,6 +37,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ projectId }) => {
   const [isSending, setIsSending] = useState(false);
   const [scopeWarning, setScopeWarning] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!projectId) return;
@@ -57,6 +59,38 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ projectId }) => {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+
+  const handleAttachFile = async (file: File) => {
+    if (!user) return;
+    const form = new FormData();
+    form.append('file', file);
+    form.append('projectId', projectId);
+
+    try {
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: form,
+        headers: {
+          Authorization: `Bearer ${await user.getIdToken()}`,
+        },
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload failed');
+
+      const messagesRef = collection(db, 'projects', projectId, 'messages');
+      await addDoc(messagesRef, {
+        senderId: user.uid,
+        senderName: user.displayName || 'Anonymous',
+        content: `Attachment: ${file.name}`,
+        attachments: [uploadData.url],
+        type: 'text',
+        timestamp: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Attachment error:', error);
+    }
+  };
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -120,7 +154,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ projectId }) => {
                 ? "bg-[#1C1C1C] text-white rounded-tr-none" 
                 : "bg-white border border-[#D4CFCA] text-[#1C1C1C] rounded-tl-none"
             )}>
-              {msg.content}
+              {sanitizeText(msg.content)}
             </div>
           </div>
         ))}
@@ -141,8 +175,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ projectId }) => {
       )}
 
       {/* Input */}
+      <input type="file" ref={fileInputRef} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAttachFile(f); }} />
       <form onSubmit={handleSendMessage} className="p-4 border-t border-[#D4CFCA] flex gap-2 bg-white">
-        <Button type="button" variant="tertiary" size="icon" className="shrink-0 text-[#8B8680]">
+        <Button type="button" variant="tertiary" size="icon" className="shrink-0 text-[#8B8680]" onClick={() => fileInputRef.current?.click()}>
           <Paperclip className="w-5 h-5" />
         </Button>
         <Input 

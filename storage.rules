@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Only authenticated users can upload to their own namespace
+    match /uploads/{userId}/{allPaths=**} {
+      allow write: if isOwner(userId);
+      allow read: if isOwner(userId);
+    }
+
+    // Preview assets can be read publicly (watermarked content)
+    match /previews/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Full files remain private until backend/payment flow grants signed URL access
+    match /full/{userId}/{allPaths=**} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

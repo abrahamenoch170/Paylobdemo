@@ -119,7 +119,7 @@ const CertificateDocument = ({ milestone, project }: { milestone: Milestone, pro
         </View>
         <View style={styles.detailBox}>
           <Text style={styles.detailLabel}>Settlement Date</Text>
-          <Text style={styles.detailValue}>{new Date(milestone.updatedAt as any).toLocaleDateString()}</Text>
+          <Text style={styles.detailValue}>{new Date((milestone.updatedAt as Date) || Date.now()).toLocaleDateString()}</Text>
         </View>
         <View style={styles.detailBox}>
           <Text style={styles.detailLabel}>Consideration</Text>

@@ -17,7 +17,7 @@ export interface Project {
   description: string;
   totalAmount: number;
   status: 'DRAFT' | 'ACTIVE' | 'SETTLED' | 'DISPUTED';
-  createdAt: Timestamp;
+  createdAt: Timestamp | Date;
 }
 
 export interface Milestone {
@@ -26,8 +26,15 @@ export interface Milestone {
   title: string;
   description: string;
   amount: number;
-  dueDate: Timestamp;
-  state: 'AUTHORIZED' | 'HELD' | 'DELIVERED' | 'REVISION_REQUESTED' | 'SETTLED';
+  dueDate: Timestamp | Date;
+  state: 'SIGNED' | 'AUTHORIZED' | 'HELD' | 'DELIVERED' | 'REVISION_REQUESTED' | 'SETTLED';
+  revisionLimit?: number;
+  revisionUsed?: number;
+  acceptanceCriteria?: string;
+  createdAt?: Timestamp | Date;
+  updatedAt?: Timestamp | Date;
+  deliveryNotes?: string;
+  deliverables?: string[];
 }
 
 export interface Contract {
@@ -53,6 +60,15 @@ export interface FileRecord {
   url: string;
   encrypted: boolean;
   hash: string;
+  fileName?: string;
+  size?: number;
+  type?: string;
+  storagePath?: string;
+  uploadedBy?: string;
+  previewUrl?: string;
+  accessState?: string;
+  createdAt?: Timestamp | Date;
+  uploadedAt?: Timestamp | Date;
 }
 
 export interface Payment {

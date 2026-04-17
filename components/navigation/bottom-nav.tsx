@@ -8,7 +8,7 @@ export function BottomNavBar() {
   const location = useLocation();
   const openAi = useAiStore(state => state.openAi);
 
-  const NavItem = ({ href, icon: Icon, label, isActive }: any) => (
+  const NavItem = ({ href, icon: Icon, label, isActive }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string; isActive: boolean }) => (
     <Link to={href} className={cn(
       "flex flex-col items-center justify-center w-[20%] gap-1",
       isActive ? "text-[#1C1C1C]" : "text-[#8B8680] hover:text-[#1C1C1C]"
