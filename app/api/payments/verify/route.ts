@@ -1,33 +1,43 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { flutterwave } from '@/lib/payment/flutterwave';
 import { paystack } from '@/lib/payment/paystack';
 
-export async function GET(req: Request) {
+const querySchema = z.object({
+  provider: z.enum(['flutterwave', 'paystack']),
+  reference: z.string().optional(),
+  transaction_id: z.string().optional(),
+});
+
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const provider = searchParams.get('provider');
-    const reference = searchParams.get('reference');
-    const transaction_id = searchParams.get('transaction_id');
+    const parsed = querySchema.parse({
+      provider: searchParams.get('provider'),
+      reference: searchParams.get('reference') ?? undefined,
+      transaction_id: searchParams.get('transaction_id') ?? undefined,
+    });
 
-    if (!provider || (!reference && !transaction_id)) {
+    if (!parsed.reference && !parsed.transaction_id) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    let result;
-    if (provider === 'flutterwave') {
-      result = await flutterwave.verifyTransaction(transaction_id || reference!);
-    } else {
-      result = await paystack.verifyTransaction(reference!);
-    }
+    const result =
+      parsed.provider === 'flutterwave'
+        ? await flutterwave.verifyTransaction(parsed.transaction_id ?? parsed.reference!)
+        : await paystack.verifyTransaction(parsed.reference!);
 
-    if (result.status === 'success' || (provider === 'paystack' && result.status)) {
-       // Webhook usually handles the state update, but we can do a sanity check here
-       return NextResponse.json({ status: 'success', data: result });
+    if (result.status === 'success' || (parsed.provider === 'paystack' && result.status)) {
+      return NextResponse.json({ status: 'success', data: result });
     }
 
     return NextResponse.json({ status: 'failed', data: result });
-  } catch (error: any) {
-    console.error('Payment Verification failed:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid request parameters', details: error.flatten() }, { status: 400 });
+    }
+
+    console.error('Payment verification failed:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

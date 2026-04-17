@@ -1,7 +1,23 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { adminDb } from '@/lib/firebase-admin';
 import { flutterwave } from '@/lib/payment/flutterwave';
 import { paystack } from '@/lib/payment/paystack';
+
+const webhookSchema = z.object({
+  event: z.string().optional(),
+  data: z
+    .object({
+      reference: z.string().optional(),
+      tx_ref: z.string().optional(),
+      status: z.string().optional(),
+      amount: z.number().optional(),
+      currency: z.string().optional(),
+      customer: z.object({ email: z.string().email().optional() }).optional(),
+      user: z.object({ email: z.string().email().optional() }).optional(),
+    })
+    .passthrough(),
+});
 
 export async function POST(req: Request) {
   try {
@@ -10,26 +26,22 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
 
     if (!signature) {
-      return new Response('Missing signature', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify signature
-    let isValid = false;
-    if (provider === 'paystack') {
-      isValid = paystack.verifyWebhook(signature, rawBody);
-    } else {
-      isValid = flutterwave.verifyWebhook(signature, JSON.parse(rawBody));
-    }
+    const isValid =
+      provider === 'paystack'
+        ? paystack.verifyWebhook(signature, rawBody)
+        : flutterwave.verifyWebhook(signature, JSON.parse(rawBody));
 
     if (!isValid) {
-      return new Response('Unauthorized request', { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const bodyData = JSON.parse(rawBody);
-    const { event, data } = bodyData;
+    const { event, data } = webhookSchema.parse(JSON.parse(rawBody));
 
-    const reference = data?.reference || data?.tx_ref;
-    const isSuccessful = event === 'charge.success' || data?.status === 'successful';
+    const reference = data.reference || data.tx_ref;
+    const isSuccessful = event === 'charge.success' || data.status === 'successful';
 
     if (isSuccessful && reference) {
       const milestoneId = reference.split('-')[0];
@@ -40,7 +52,7 @@ export async function POST(req: Request) {
         await milestoneRef.update({
           state: 'AUTHORIZED',
           paymentRef: reference,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString(),
         });
 
         await adminDb.collection('payments').add({
@@ -51,16 +63,18 @@ export async function POST(req: Request) {
           currency: data.currency,
           customerEmail: data.customer?.email || data.user?.email,
           status: 'SUCCESS',
-          createdAt: new Date()
+          createdAt: new Date().toISOString(),
         });
-        
-        console.log(`✅ Payment authorized for milestone ${milestoneId}`);
       }
     }
 
-    return NextResponse.json({ status: 'ok', msg: 'payment webhook processed' });
-  } catch (err: any) {
-    console.error('Webhook processing error:', err);
-    return new Response('Internal Server Error', { status: 500 });
+    return NextResponse.json({ status: 'ok', message: 'Webhook processed' });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid webhook payload', details: error.flatten() }, { status: 400 });
+    }
+
+    console.error('Webhook processing error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

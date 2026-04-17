@@ -1,14 +1,11 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/$1"
-    }
-  ],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter_api_key",
     "RESEND_API_KEY": "@resend_api_key",
     "FLUTTERWAVE_SECRET_KEY": "@flutterwave_secret_key",
-    "PAYSTACK_SECRET_KEY": "@paystack_secret_key"
+    "PAYSTACK_SECRET_KEY": "@paystack_secret_key",
+    "FIREBASE_ADMIN_PROJECT_ID": "@firebase_admin_project_id",
+    "FIREBASE_ADMIN_CLIENT_EMAIL": "@firebase_admin_client_email",
+    "FIREBASE_ADMIN_PRIVATE_KEY": "@firebase_admin_private_key"
   }
 }
