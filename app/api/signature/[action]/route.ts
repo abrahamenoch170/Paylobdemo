@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { docuseal } from '@/lib/signature/docuseal';
+import { eSignature } from '@/lib/signature/docuseal';
 
 export async function POST(req: Request, { params }: { params: { action: string } }) {
   const { action } = params;
@@ -8,12 +8,12 @@ export async function POST(req: Request, { params }: { params: { action: string 
 
   try {
     if (action === 'request') {
-      const { milestoneId, signers } = body;
-      const result = await docuseal.createSignatureRequest(signers);
+      const { milestoneId, signers, documentUrl } = body;
+      const result = await eSignature.createSignatureRequest(documentUrl, signers);
       
       await adminDb.collection('signature_audit').add({
         milestoneId,
-        submissionId: result[0].submission_id, // Adjusted for typical docuseal response
+        submissionId: result.submissionId,
         status: 'PENDING',
         requestedAt: new Date()
       });
@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: { action: string 
 
     if (action === 'verify') {
       const { submissionId } = body;
-      const status = await docuseal.getSignatureStatus(submissionId);
+      const status = await eSignature.getSignatureStatus(submissionId);
       
       return NextResponse.json({ success: true, status });
     }
