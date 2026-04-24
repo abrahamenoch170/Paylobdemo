@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { flutterwave } from '@/lib/payment/flutterwave';
 import { paystack } from '@/lib/payment/paystack';
 
+export const dynamic = 'force-dynamic';
+
 const querySchema = z.object({
   provider: z.enum(['flutterwave', 'paystack']),
   reference: z.string().optional(),

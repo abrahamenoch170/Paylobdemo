@@ -59,7 +59,7 @@ export default function RoleSelectionPage() {
             <Briefcase className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[#1C1C1C]">I'm a Freelancer</h3>
+            <h3 className="text-xl font-bold text-[#1C1C1C]">I&apos;m a Freelancer</h3>
             <p className="text-sm text-[#8B8680]">I want to send secure delivery-linked invoices and get paid on time.</p>
           </div>
         </button>
@@ -74,7 +74,7 @@ export default function RoleSelectionPage() {
             <UserCircle className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[#1C1C1C]">I'm a Client</h3>
+            <h3 className="text-xl font-bold text-[#1C1C1C]">I&apos;m a Client</h3>
             <p className="text-sm text-[#8B8680]">I want to hire talent with escrow protection and verified deliveries.</p>
           </div>
         </button>

@@ -84,7 +84,9 @@ export default function ProjectsPage() {
               <div className="flex items-center justify-between pt-6 border-t border-[#F5F2ED]">
                 <div className="flex items-center gap-2 text-[#8B8680] text-xs">
                   <Clock className="w-3 h-3" />
-                  {new Date(p.createdAt).toLocaleDateString()}
+                  {p.createdAt instanceof Date
+                    ? p.createdAt.toLocaleDateString()
+                    : (p.createdAt as any)?.toDate?.()?.toLocaleDateString() ?? ''}
                 </div>
                 <div className="font-bold text-[#1C1C1C]">
                   ${p.totalAmount}

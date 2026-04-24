@@ -55,7 +55,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#1C1C1C]">Dashboard</h1>
-          <p className="text-[#8B8680] mt-1">Welcome back. Here's what needs your attention.</p>
+          <p className="text-[#8B8680] mt-1">Welcome back. Here&apos;s what needs your attention.</p>
         </div>
         {role === 'freelancer' && (
           <Button onClick={() => router.push('/projects/new')} className="shrink-0 gap-2">
@@ -72,7 +72,7 @@ export default function DashboardPage() {
           {loading && <div className="text-sm text-[#8B8680]">Loading...</div>}
           {!loading && awaitingClientSig.length === 0 && authorizedMilestones.length === 0 && deliveredMilestones.length === 0 && (
              <div className="p-8 text-center bg-white border border-[#D4CFCA] rounded-xl text-[#8B8680]">
-               You're all caught up!
+               You&apos;re all caught up!
              </div>
           )}
 

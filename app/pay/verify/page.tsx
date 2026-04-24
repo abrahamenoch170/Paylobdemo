@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function PaymentVerifyPage() {
+function PaymentVerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -58,7 +58,7 @@ export default function PaymentVerifyPage() {
         </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-[#1C1C1C]">Payment Verification Failed</h1>
-          <p className="text-[#8B8680]">{error || 'We couldn\'t verify your payment.'}</p>
+          <p className="text-[#8B8680]">{error || "We couldn&apos;t verify your payment."}</p>
         </div>
         <Button className="w-full" onClick={() => router.push('/dashboard')}>
           Back to Dashboard
@@ -86,5 +86,18 @@ export default function PaymentVerifyPage() {
         Continue to Dashboard
       </Button>
     </div>
+  );
+}
+
+export default function PaymentVerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Loader2 className="w-12 h-12 text-[#1C1C1C] animate-spin" />
+        <p className="text-[#8B8680]">Loading...</p>
+      </div>
+    }>
+      <PaymentVerifyContent />
+    </Suspense>
   );
 }

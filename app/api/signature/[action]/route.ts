@@ -6,8 +6,6 @@ import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { requireAuth } from '@/lib/server-auth';
 import { checkRateLimit, getRateLimitKey } from '@/lib/rate-limit';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const sendSchema = z.object({
   contractId: z.string().min(1),
   email: z.string().email(),
@@ -47,6 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       }
 
+      const resend = new Resend(process.env.RESEND_API_KEY);
       await contractRef.update({ status: 'PENDING_SIGNATURE', updatedAt: new Date().toISOString() });
       await resend.emails.send({
         from: 'Paylob <hello@paylob.xyz>',

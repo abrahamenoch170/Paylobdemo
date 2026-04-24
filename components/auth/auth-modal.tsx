@@ -39,9 +39,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
-  
+
   const { signIn, signUp, signInWithGoogle, signInWithGitHub, signInWithApple } = useAuth();
-  
+
   useEffect(() => {
     setMode(initialMode);
     setErrorMsg(null);
@@ -115,11 +115,11 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
 
   return (
     <div className="fixed inset-0 bg-[#0A0A0A]/40 z-50 flex items-center justify-center p-0 md:p-4 transition-all overflow-y-auto">
-      <div 
+      <div
         className="w-full h-full md:h-auto md:max-w-md bg-[#FFFFFF] md:rounded-xl shadow-xl flex flex-col relative animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
+        <button
           onClick={onClose}
           className="absolute right-4 top-4 p-2 text-[#8B8680] hover:text-[#1C1C1C] hover:bg-[#F5F2ED] rounded-full transition-colors z-10"
         >
@@ -132,8 +132,8 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
               {mode === 'login' ? 'Welcome back' : 'Create an account'}
             </h2>
             <p className="text-sm text-[#8B8680]">
-              {mode === 'login' 
-                ? 'Enter your details to sign in to your account' 
+              {mode === 'login'
+                ? 'Enter your details to sign in to your account'
                 : 'Sign up to start receiving secure payments'}
             </p>
           </div>
@@ -204,10 +204,10 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                   {isLoginSubmitting ? 'Signing in...' : 'Sign in'}
                 </Button>
               </div>
-              
+
               <div className="text-center mt-6">
-                <span className="text-[#8B8680] text-sm">Don't have an account? </span>
-                <button 
+                <span className="text-[#8B8680] text-sm">Don&apos;t have an account? </span>
+                <button
                   type="button"
                   onClick={() => setMode('signup')}
                   className="text-sm font-semibold text-[#1C1C1C] hover:underline"
@@ -257,10 +257,10 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                   {isSignupSubmitting ? 'Creating...' : 'Create account'}
                 </Button>
               </div>
-              
+
               <div className="text-center mt-6">
                 <span className="text-[#8B8680] text-sm">Already have an account? </span>
-                <button 
+                <button
                   type="button"
                   onClick={() => setMode('login')}
                   className="text-sm font-semibold text-[#1C1C1C] hover:underline"

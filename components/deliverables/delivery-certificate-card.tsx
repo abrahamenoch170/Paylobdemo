@@ -125,7 +125,7 @@ const CertificateDocument = ({ milestone, project }: { milestone: Milestone, pro
           <Text style={styles.detailLabel}>Consideration</Text>
           <Text style={styles.detailValue}>${milestone.amount.toLocaleString()} USD</Text>
         </View>
-        
+
         <View style={{ width: '100%', marginTop: 10 }}>
           <Text style={styles.detailLabel}>Cryptographic Integrity Hash (SHA-256)</Text>
           <View style={styles.hashBox}>
@@ -139,7 +139,7 @@ const CertificateDocument = ({ milestone, project }: { milestone: Milestone, pro
           NOTICE: All rights, title, and interest in and to the works described herein are hereby transferred to the Payor from the Payee upon successful cryptographic confirmation of payment via the Paylob protocol.
         </Text>
         <View style={styles.seal}>
-           <Text style={{ fontSize: 8, color: '#C5A059', fontWeight: 'bold' }}>VERIFIED</Text>
+          <Text style={{ fontSize: 8, color: '#C5A059', fontWeight: 'bold' }}>VERIFIED</Text>
         </View>
       </View>
     </Page>
@@ -149,43 +149,43 @@ const CertificateDocument = ({ milestone, project }: { milestone: Milestone, pro
 export function DeliveryCertificateCard({ milestone, project }: { milestone: Milestone, project: Project }) {
   return (
     <div className="bg-white border-2 border-[#1C1C1C] rounded-2xl overflow-hidden shadow-xl animate-in zoom-in duration-300">
-       <div className="p-6 bg-[#1C1C1C] text-white flex justify-between items-center">
-          <div className="flex items-center gap-3">
-             <div className="bg-white/10 p-2 rounded-xl">
-                <ShieldCheck className="w-6 h-6 text-green-400" />
-             </div>
-             <div>
-                <h3 className="font-bold text-sm uppercase tracking-widest">Delivery Certificate</h3>
-                <p className="text-[10px] text-white/50 font-medium">Cryptographically Sealed & Signed</p>
-             </div>
+      <div className="p-6 bg-[#1C1C1C] text-white flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="bg-white/10 p-2 rounded-xl">
+            <ShieldCheck className="w-6 h-6 text-green-400" />
           </div>
-          <CheckCircle className="w-5 h-5 text-green-400" />
-       </div>
+          <div>
+            <h3 className="font-bold text-sm uppercase tracking-widest">Delivery Certificate</h3>
+            <p className="text-[10px] text-white/50 font-medium">Cryptographically Sealed & Signed</p>
+          </div>
+        </div>
+        <CheckCircle className="w-5 h-5 text-green-400" />
+      </div>
 
-       <div className="p-6 space-y-4">
-          <p className="text-xs text-[#8B8680] leading-relaxed">
-            This certificate serves as legal proof of final payment and title transfer for <span className="text-[#1C1C1C] font-bold">"{milestone.title}"</span>. 
-            Digital signatures and file hashes are embedded in the document.
-          </p>
+      <div className="p-6 space-y-4">
+        <p className="text-xs text-[#8B8680] leading-relaxed">
+          This certificate serves as legal proof of final payment and title transfer for <span className="text-[#1C1C1C] font-bold">&quot;{milestone.title}&quot;</span>.
+          Digital signatures and file hashes are embedded in the document.
+        </p>
 
-          <PDFDownloadLink 
-            document={<CertificateDocument milestone={milestone} project={project} />} 
-            fileName={`paylob-certificate-${milestone.id.substring(0, 8)}.pdf`}
-          >
-            {({ loading }) => (
-              <Button 
-                className="w-full bg-[#1C1C1C] text-white gap-2 h-12 uppercase tracking-widest font-black text-xs"
-                disabled={loading}
-              >
-                {loading ? 'Generating...' : <><Download className="w-4 h-4" /> Download Certificate (PDF)</>}
-              </Button>
-            )}
-          </PDFDownloadLink>
+        <PDFDownloadLink
+          document={<CertificateDocument milestone={milestone} project={project} />}
+          fileName={`paylob-certificate-${milestone.id.substring(0, 8)}.pdf`}
+        >
+          {({ loading }) => (
+            <Button
+              className="w-full bg-[#1C1C1C] text-white gap-2 h-12 uppercase tracking-widest font-black text-xs"
+              disabled={loading}
+            >
+              {loading ? 'Generating...' : <><Download className="w-4 h-4" /> Download Certificate (PDF)</>}
+            </Button>
+          )}
+        </PDFDownloadLink>
 
-          <button className="w-full flex items-center justify-center gap-2 text-[10px] font-bold text-[#8B8680] uppercase tracking-widest hover:text-[#1C1C1C] transition-colors">
-             <FileText className="w-3 h-3" /> View Hash Log
-          </button>
-       </div>
+        <button className="w-full flex items-center justify-center gap-2 text-[10px] font-bold text-[#8B8680] uppercase tracking-widest hover:text-[#1C1C1C] transition-colors">
+          <FileText className="w-3 h-3" /> View Hash Log
+        </button>
+      </div>
     </div>
   );
 }

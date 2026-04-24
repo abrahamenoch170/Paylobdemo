@@ -3,8 +3,6 @@ import { Resend } from 'resend';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/server-auth';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const emailSchema = z.object({
   to: z.string().email(),
   subject: z.string().min(1).max(200),
@@ -15,6 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAuth(req);
     const payload = emailSchema.parse(await req.json());
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
       from: 'Paylob <hello@paylob.xyz>',

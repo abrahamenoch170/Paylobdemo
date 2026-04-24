@@ -3,8 +3,6 @@ import { Resend } from 'resend';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/server-auth';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const notificationSchema = z.object({
   type: z.enum(['contract_sent']),
   email: z.string().email(),
@@ -17,6 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     await requireAuth(req);
     const { type, email, data } = notificationSchema.parse(await req.json());
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     let subject = '';
     let html = '';

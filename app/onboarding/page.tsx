@@ -18,8 +18,8 @@ export default function UnifiedOnboardingPage() {
     <div className="p-8 max-w-2xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold">Welcome to Paylob</h1>
       <div className="flex gap-4">
-        <Button onClick={() => setRole('client')} variant={role === 'client' ? 'default' : 'outline'}>Client</Button>
-        <Button onClick={() => setRole('freelancer')} variant={role === 'freelancer' ? 'default' : 'outline'}>Freelancer</Button>
+        <Button onClick={() => setRole('client')} variant={role === 'client' ? 'primary' : 'secondary'}>Client</Button>
+        <Button onClick={() => setRole('freelancer')} variant={role === 'freelancer' ? 'primary' : 'secondary'}>Freelancer</Button>
       </div>
       <div>
         <label>Your Name:</label>

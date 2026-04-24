@@ -65,7 +65,7 @@ export default function ContractPage() {
         </div>
 
         <div className="space-y-6 text-[#1C1C1C] leading-relaxed">
-          <p>This Service Agreement ("Agreement") is entered into as of the date of electronic signature by and between the service provider ("Freelancer") and the service recipient ("Client").</p>
+          <p>This Service Agreement (&ldquo;Agreement&rdquo;) is entered into as of the date of electronic signature by and between the service provider (&ldquo;Freelancer&rdquo;) and the service recipient (&ldquo;Client&rdquo;).</p>
           
           <div>
             <h3 className="text-lg font-bold mb-2">1. Scope of Work</h3>
@@ -79,7 +79,7 @@ export default function ContractPage() {
 
           <div>
             <h3 className="text-lg font-bold mb-2">3. Delivery & Escrow</h3>
-            <p>Payment shall be authorized and held in escrow before work begins. Release of funds is contingent upon the Client's approval of deliverables or the expiration of the dispute window.</p>
+            <p>Payment shall be authorized and held in escrow before work begins. Release of funds is contingent upon the Client&apos;s approval of deliverables or the expiration of the dispute window.</p>
           </div>
 
           <div>
